@@ -25,8 +25,6 @@ export default {
     // }
   },
   register(app) {
-    // "upload" プラグインのメニューを非表示にする
-    app.customFields.unregister('plugin::upload.default');
-    app.menu.removeLink('plugin::upload');
+
   },
 };
