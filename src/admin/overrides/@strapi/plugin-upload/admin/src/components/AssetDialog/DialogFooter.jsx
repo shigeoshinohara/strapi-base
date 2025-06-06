@@ -16,20 +16,21 @@ export const DialogFooter = ({ onClose, onValidate }) => {
   };
 
   return (
-    <ModalFooter
-      startActions={
-        <Button onClick={onClose} variant="tertiary">
-          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-        </Button>
-      }
-      endActions={
-        onValidate && (
-          <Button onClick={handleValidate}>
-            {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
-          </Button>
-        )
-      }
-    />
+    <div>TEST OVERRIDE</div>
+    // <ModalFooter
+    //   startActions={
+    //     <Button onClick={onClose} variant="tertiary">
+    //       {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+    //     </Button>
+    //   }
+    //   endActions={
+    //     onValidate && (
+    //       <Button onClick={handleValidate}>
+    //         {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
+    //       </Button>
+    //     )
+    //   }
+    // />
   );
 };
 
