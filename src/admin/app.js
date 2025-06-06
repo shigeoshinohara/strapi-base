@@ -10,19 +10,19 @@ export default {
     console.log('カスタム管理画面の初期化 - src/admin/app.js');
 
     // 拡張機能のログ出力テスト
-    console.log('アップロードプラグイン拡張の初期化を試みます');
-
-    try {
-      // プラグインをオーバーライド
-      app.overridePlugin(uploadPluginId, {
-        components: {
-          MediaLibraryCard: CustomMediaLibraryCard,
-        },
-      });
-      console.log('アップロードプラグインのオーバーライド成功');
-    } catch (error) {
-      console.error('アップロードプラグインのオーバーライドエラー:', error);
-    }
+    // console.log('アップロードプラグイン拡張の初期化を試みます');
+    //
+    // try {
+    //   // プラグインをオーバーライド
+    //   app.overridePlugin(uploadPluginId, {
+    //     components: {
+    //       MediaLibraryCard: CustomMediaLibraryCard,
+    //     },
+    //   });
+    //   console.log('アップロードプラグインのオーバーライド成功');
+    // } catch (error) {
+    //   console.error('アップロードプラグインのオーバーライドエラー:', error);
+    // }
   },
   register(app) {
     // "upload" プラグインのメニューを非表示にする

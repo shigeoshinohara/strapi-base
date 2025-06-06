@@ -10,16 +10,18 @@ export default {
     console.log(`${name}: アップロードプラグインの管理画面 UI 拡張が登録されました`);
 
     try {
-      // コンポーネントをオーバーライド
-      app.overridePlugin(pluginId, {
+      // プラグインの登録
+      app.registerPlugin({
+        id: pluginId,
+        isReady: true,
         components: {
           MediaLibraryCard: CustomMediaLibraryCard,
         },
       });
 
-      console.log('コンポーネントオーバーライド成功');
+      console.log('プラグイン登録成功');
     } catch (error) {
-      console.error('コンポーネントオーバーライドエラー:', error);
+      console.error('プラグイン登録エラー:', error);
     }
   },
 
