@@ -1,5 +1,5 @@
 {
-  "name": "@shigeoshinohara/strapi-admin-upload-extension",
+  "name": "upload-admin-extension",
   "version": "0.1.0",
   "description": "カスタムアップロードプラグインの管理画面拡張",
   "main": "src/index.js",
@@ -7,13 +7,5 @@
     "name": "upload",
     "description": "アップロードプラグインの UI カスタマイズ",
     "kind": "plugin"
-  },
-  "dependencies": {},
-  "peerDependencies": {
-    "@strapi/strapi": "^4.25.14",
-    "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "^5.2.0",
-    "styled-components": "^5.2.1"
   }
 }

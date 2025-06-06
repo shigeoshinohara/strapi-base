@@ -1,4 +1,5 @@
 import pluginId from './pluginId';
+import CustomMediaLibraryCard from './components/MediaLibraryCard';
 
 const name = 'upload-admin-extension';
 
@@ -8,11 +9,18 @@ export default {
   register(app) {
     console.log(`${name}: アップロードプラグインの管理画面 UI 拡張が登録されました`);
 
-    // 最小限のオーバーライド
-    app.registerPlugin({
-      id: pluginId,
-      name,
-    });
+    try {
+      // コンポーネントをオーバーライド
+      app.overridePlugin(pluginId, {
+        components: {
+          MediaLibraryCard: CustomMediaLibraryCard,
+        },
+      });
+
+      console.log('コンポーネントオーバーライド成功');
+    } catch (error) {
+      console.error('コンポーネントオーバーライドエラー:', error);
+    }
   },
 
   bootstrap(app) {
