@@ -152,9 +152,9 @@ export default {
       setupMediaLibraryChecker();
     };
 
-    // 元の「Add new assets」ボタンを非表示にする関数
+    // 元の「Add new assets」および「Add more assets」ボタンを非表示にする関数
     const hideOriginalAddNewAssetsButton = () => {
-      // console.log('元の「Add new assets」ボタンを非表示にします');
+      // console.log('元の「Add new assets」と「Add more assets」ボタンを非表示にします');
 
       // CSSを使ってセレクタに一致するボタンを非表示にする
       const styleId = 'hide-original-button-style';
@@ -162,12 +162,17 @@ export default {
         const styleElement = document.createElement('style');
         styleElement.id = styleId;
         styleElement.textContent = `
-          /* Add new assetsボタン非表示 */
+          /* Add new assets/Add more assetsボタン非表示 */
           button span:contains('Add new assets'),
           button:contains('Add new assets'),
           button[aria-label*="add new asset"],
           button[aria-label*="upload"],
-          button:has(> span:contains('Add new assets')) {
+          button:has(> span:contains('Add new assets')),
+          /* Add more assetsボタンの非表示 */
+          button span:contains('Add more assets'),
+          button:contains('Add more assets'),
+          button:has(> span:contains('Add more assets')),
+          [data-strapi-header-action="add-assets"] {
             display: none !important;
           }
         `;
@@ -176,35 +181,49 @@ export default {
 
       // DOMから直接ボタンを探して非表示にする
       const findAndHideButtons = () => {
-        // 方法1: テキストコンテンツで検索
+        // Add new assets ボタン検出
         document.querySelectorAll('button').forEach(button => {
-          if (button.textContent && button.textContent.includes('Add new assets')) {
-            // console.log('テキストで「Add new assets」ボタンを発見、非表示にします');
+          if (button.textContent && (button.textContent.includes('Add new assets') ||
+            button.textContent.includes('Add more assets'))) {
+            // console.log('テキストで「Add new/more assets」ボタンを発見、非表示にします');
             button.style.display = 'none';
           }
         });
 
-        // 方法2: spanテキストで検索
+        // span内のテキスト検出
         document.querySelectorAll('button span').forEach(span => {
-          if (span.textContent && span.textContent.includes('Add new assets')) {
-            // console.log('span内テキストで「Add new assets」ボタンを発見、非表示にします');
+          if (span.textContent && (span.textContent.includes('Add new assets') ||
+            span.textContent.includes('Add more assets'))) {
+            // console.log('span内テキストで「Add new/more assets」ボタンを発見、非表示にします');
             const button = span.closest('button');
             if (button) button.style.display = 'none';
           }
         });
 
-        // 方法3: aria-label属性で検索
-        document.querySelectorAll('button[aria-label*="add new asset"]').forEach(button => {
+        // aria-label属性で検索
+        document.querySelectorAll('button[aria-label*="add new asset"], button[aria-label*="add more asset"]').forEach(button => {
           // console.log('aria-labelで候補ボタンを発見、非表示にします:', button.getAttribute('aria-label'));
           button.style.display = 'none';
         });
 
-        // 方法4: 属性やデータ属性で検索
-        document.querySelectorAll('button[data-for*="asset"], button[id*="asset"]').forEach(button => {
+        // 属性やデータ属性で検索
+        document.querySelectorAll('button[data-for*="asset"], button[id*="asset"], [data-strapi-header-action="add-assets"]').forEach(button => {
           if (button.textContent && button.textContent.toLowerCase().includes('add')) {
-            // console.log('データ属性で「Add new assets」ボタンを発見、非表示にします');
+            // console.log('データ属性で「Add assets」ボタンを発見、非表示にします');
             button.style.display = 'none';
           }
+        });
+
+        // ダイアログ内のボタンを検出
+        const mediaLibDialogs = document.querySelectorAll('.media-dialog, [role="dialog"], .ReactModal__Content');
+        mediaLibDialogs.forEach(dialog => {
+          dialog.querySelectorAll('button').forEach(button => {
+            if (button.textContent && (button.textContent.includes('Add new assets') ||
+              button.textContent.includes('Add more assets'))) {
+              // console.log('ダイアログ内の「Add assets」ボタンを発見、非表示にします');
+              button.style.display = 'none';
+            }
+          });
         });
       };
 
@@ -227,20 +246,65 @@ export default {
         childList: true,
         subtree: true
       });
+
+      // モーダルダイアログの出現を検知して対応
+      const setupModalObserver = () => {
+        // モーダル要素のクラスに基づいて監視
+        const modalObserver = new MutationObserver((mutations) => {
+          mutations.forEach(mutation => {
+            if (mutation.addedNodes.length) {
+              // モーダルダイアログが追加された可能性がある
+              const addedNodes = Array.from(mutation.addedNodes);
+              for (const node of addedNodes) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                  // モーダル内のボタンを探して非表示に
+                  if (node.classList && (
+                    node.classList.contains('ReactModal__Content') ||
+                    node.classList.contains('dialog') ||
+                    node.getAttribute('role') === 'dialog')) {
+                    // console.log('新しいモーダルダイアログを検出');
+                    setTimeout(findAndHideButtons, 100); // 少し遅延させて実行
+                  }
+
+                  // 子孫要素にモーダルがある可能性もチェック
+                  if (node.querySelectorAll) {
+                    const modals = node.querySelectorAll('.ReactModal__Content, .dialog, [role="dialog"]');
+                    if (modals.length > 0) {
+                      // console.log('追加されたノード内にモーダルダイアログを検出');
+                      setTimeout(findAndHideButtons, 100);
+                    }
+                  }
+                }
+              }
+            }
+          });
+        });
+
+        modalObserver.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+
+        return modalObserver;
+      };
+
+      // モーダル監視を設定
+      setupModalObserver();
     };
 
-    // 「Add new assets」ボタンを直接削除する関数
+    // 「Add new assets」と「Add more assets」ボタンを直接削除する関数
     const removeAddNewAssetsButton = () => {
-      // console.log('「Add new assets」ボタンを削除します');
+      // console.log('「Add new assets」と「Add more assets」ボタンを削除します');
 
       const removeInterval = setInterval(() => {
-        // まず非表示にして、
+        // ボタンを検索して削除
         const buttons = document.querySelectorAll('button');
         let found = false;
 
         for (const button of buttons) {
-          if (button.textContent && button.textContent.includes('Add new assets')) {
-            // console.log('「Add new assets」ボタンを発見、削除します');
+          if (button.textContent && (button.textContent.includes('Add new assets') ||
+            button.textContent.includes('Add more assets'))) {
+            // console.log('「Add assets」ボタンを発見、削除します');
             if (button.parentNode) {
               button.parentNode.removeChild(button);
               found = true;
@@ -250,10 +314,23 @@ export default {
 
         // spanテキストで検索
         document.querySelectorAll('button span').forEach(span => {
-          if (span.textContent && span.textContent.includes('Add new assets')) {
-            // console.log('span内テキストで「Add new assets」ボタンを発見、削除します');
+          if (span.textContent && (span.textContent.includes('Add new assets') ||
+            span.textContent.includes('Add more assets'))) {
+            // console.log('span内テキストで「Add assets」ボタンを発見、削除します');
             const button = span.closest('button');
             if (button && button.parentNode) {
+              button.parentNode.removeChild(button);
+              found = true;
+            }
+          }
+        });
+
+        // ダイアログ内のボタンをチェック
+        document.querySelectorAll('.ReactModal__Content button, [role="dialog"] button, .dialog button').forEach(button => {
+          if (button.textContent && (button.textContent.includes('Add new assets') ||
+            button.textContent.includes('Add more assets'))) {
+            if (button.parentNode) {
+              // console.log('ダイアログ内の「Add assets」ボタンを削除します');
               button.parentNode.removeChild(button);
               found = true;
             }
@@ -718,7 +795,6 @@ export default {
                   queryParams.append(\`filters[name][\$in][\${index}]\`, name);
                 });
                 queryParams.append('populate', '*');
-
                 // ソート順を更新日時の降順に設定
                 queryParams.append('sort', 'updatedAt:desc');
 
@@ -734,7 +810,7 @@ export default {
                 if (!response.ok) throw new Error(\`API エラー: \${response.status}\`);
 
                 const data = await response.json();
-                const allFiles =  data.results || data || [];
+                const allFiles = data.results || data || [];
 
                 // 同じファイル名のものは最新のファイルだけを残す
                 const latestFiles = [];
@@ -1065,7 +1141,7 @@ export default {
       });
 
       // ドキュメントに追加
-      document.body.appendChild(fab);
+      // document.body.appendChild(fab);
       // console.log('フローティングアクションボタンを追加しました');
 
       return fab;
@@ -1073,7 +1149,7 @@ export default {
 
     // ここで作成したカスタムファイルアップロード機能の実装を開始
     setupConfirmOverride();
-    hideOriginalAddNewAssetsButton(); // 「Add new assets」ボタンを非表示に
+    hideOriginalAddNewAssetsButton(); // 「Add new assets」と「Add more assets」ボタンを非表示に
     removeAddNewAssetsButton(); // 強制的に削除も試みる
     addUploadButtonNextToAddNewFolder(); // 「Add new folder」の隣に「Upload」ボタンを追加
     setupNavigationDetection(); // ページ遷移検出機能を追加
