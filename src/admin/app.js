@@ -292,21 +292,23 @@ export default {
           </div>
           <script>
             // ファイルサイズを10進換算（1000で区切る）で表示（PC/DB/APIと一致）
-            function formatFileSizeFromBytesSI(bytes) {
+            const formatFileSizeFromBytesSI = (bytes) => {
               if (!bytes || isNaN(bytes) || bytes < 0) return '0 Bytes';
               if (bytes < 1000) return bytes + ' Bytes';
               if (bytes < 1_000_000) return Math.round(bytes / 1000) + ' KB';
               return (bytes / 1_000_000).toFixed(1) + ' MB';
             }
+
             // KBとMBの判定は1000で割った結果の小数点以上があるかどうかで判定（既存ファイル警告用）
-            function formatFileSizeForExistingFile(size) {
+            const formatFileSizeForExistingFile = (size) => {
               let sizeNum = Number(size);
               if (isNaN(sizeNum) || sizeNum == null) return '0 Bytes';
                if (sizeNum < 1000) return sizeNum.toFixed(0) + ' KB';
                const kb = sizeNum / 1000;
                return kb.toFixed(1) + ' MB';
             }
-            function formatDateToJST(dateString) {
+
+            const formatDateToJST = (dateString) => {
               const date = new Date(dateString);
               const year = date.getFullYear();
               const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -316,6 +318,7 @@ export default {
               const seconds = String(date.getSeconds()).padStart(2, '0');
               return year + '/' + month + '/' + day + ' ' + hours + ':' + minutes + ':' + seconds;
             }
+
             const dropZone = document.getElementById('dropZone');
             const fileInput = document.getElementById('fileInput');
             const fileList = document.getElementById('fileList');
